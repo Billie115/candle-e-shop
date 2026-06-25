@@ -46,7 +46,6 @@ export default function AdminProductEdit() {
                 </Link>
             </div>
 
-            {/* Edit form */}
             <div className="p-4">
                 <Form method="post" className="flex flex-col gap-3 w-80">
 

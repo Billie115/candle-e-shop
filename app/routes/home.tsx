@@ -17,7 +17,7 @@ export default function Home() {
 
             <div className="border-2 border-black p-8 w-64 text-center">
                 <h1 className="text-3xl font-bold">Candle Shop</h1>
-                <p className="text-sm text-gray-600 mt-1">an eisai gay agorazeis apo emas</p>
+                <p className="text-sm text-gray-600 mt-1">an den eisai gay, agorazeis apo emas</p>
             </div>
 
             <div className="w-full max-w-4xl">
