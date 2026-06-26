@@ -1,27 +1,11 @@
-import { useLoaderData, Form, Link, redirect } from "react-router";
+import { Form, Link, redirect } from "react-router";
 import { useState } from "react";
 import db from "~/db.server";
 
-export async function loader({ params }: { params: { id: string } }) {
-    const product = await db.product.findUnique({
-        where: { id: Number(params.id) },
-    });
-    return { product };
-}
-
-export async function action({ request, params }: { request: Request, params: { id: string } }) {
+export async function action({ request }: { request: Request }) {
     const formData = await request.formData();
-    const intent = formData.get("intent");
 
-    if (intent === "delete") {
-        await db.product.delete({
-            where: { id: Number(params.id) },
-        });
-        return redirect("/admin/products");
-    }
-
-    await db.product.update({
-        where: { id: Number(params.id) },
+    await db.product.create({
         data: {
             title: String(formData.get("title")),
             description: String(formData.get("description")),
@@ -34,17 +18,15 @@ export async function action({ request, params }: { request: Request, params: { 
     return redirect("/admin/products");
 }
 
-export default function AdminProductEdit() {
-    const { product } = useLoaderData<typeof loader>();
-    const [imageUrl, setImageUrl] = useState(product?.imageUrl || "");
+export default function AdminProductAdd() {
+    const [imageUrl, setImageUrl] = useState("");
 
     return (
         <div className="flex h-screen">
 
-            {/* Sidebar */}
             <div className="flex flex-col w-48">
                 <div className="border-2 border-black m-1 p-2">
-                    <h1 className="text-xl">Edit</h1>
+                    <h1 className="text-xl">Add Product</h1>
                 </div>
                 <div className="flex-1"></div>
                 <Link to="/admin/products">
@@ -54,7 +36,6 @@ export default function AdminProductEdit() {
                 </Link>
             </div>
 
-            {/* Edit form */}
             <div className="p-4">
                 <Form method="post" className="flex flex-col gap-3 w-80">
 
@@ -62,7 +43,6 @@ export default function AdminProductEdit() {
                         <label className="text-sm font-bold">Title</label>
                         <input
                             name="title"
-                            defaultValue={product?.title}
                             className="border-2 border-black p-1 text-sm"
                         />
                     </div>
@@ -71,7 +51,6 @@ export default function AdminProductEdit() {
                         <label className="text-sm font-bold">Description</label>
                         <textarea
                             name="description"
-                            defaultValue={product?.description}
                             className="border-2 border-black p-1 text-sm"
                             rows={3}
                         />
@@ -83,7 +62,6 @@ export default function AdminProductEdit() {
                             name="price"
                             type="number"
                             step="0.01"
-                            defaultValue={product?.price}
                             className="border-2 border-black p-1 text-sm"
                         />
                     </div>
@@ -110,42 +88,17 @@ export default function AdminProductEdit() {
                             type="checkbox"
                             name="visible"
                             id="visible"
-                            defaultChecked={product?.visible}
+                            defaultChecked={true}
                             className="w-4 h-4"
                         />
                         <label htmlFor="visible" className="text-sm font-bold">Visible in store</label>
                     </div>
 
-                    <button
-                        type="submit"
-                        name="intent"
-                        value="save"
-                        className="border-2 border-black p-1 text-sm font-bold"
-                    >
-                        Save
+                    <button type="submit" className="border-2 border-black p-1 text-sm font-bold">
+                        Add Product
                     </button>
 
                 </Form>
-
-                {/* Delete form — separate from the edit form */}
-                <Form
-                    method="post"
-                    className="mt-2 w-80"
-                    onSubmit={(e) => {
-                        if (!confirm("Are you sure you want to delete this product?")) {
-                            e.preventDefault();
-                        }
-                    }}
-                >
-                    <input type="hidden" name="intent" value="delete" />
-                    <button
-                        type="submit"
-                        className="border-2 border-red-600 p-1 text-sm font-bold text-red-600 w-full"
-                    >
-                        Delete Product
-                    </button>
-                </Form>
-
             </div>
 
         </div>

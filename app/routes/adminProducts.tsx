@@ -30,6 +30,11 @@ export default function AdminProducts() {
                 <div className="border-2 border-black m-1 p-2">
                     <h1 className="text-xl">Products</h1>
                 </div>
+                <Link to="/admin/products/add">
+                    <div className="border-2 border-black m-1 p-2">
+                        <h1 className="text-xl">+ Add</h1>
+                    </div>
+                </Link>
                 <div className="flex-1"></div>
                 <Link to="/admin">
                     <div className="border-2 border-black m-1 p-2">

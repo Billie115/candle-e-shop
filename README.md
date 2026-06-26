@@ -18,7 +18,7 @@ git clone <your-repo-url>
 
 ### 2. Depentancies
 
-otan to anoi3eis sto vc code anoi3e terminal kai grapse:
+otan to anoi3eis sto vs code anoi3e terminal kai grapse:
 
 ```bash
 cd candle-e-shop

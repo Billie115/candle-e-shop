@@ -7,6 +7,7 @@ export default [
     route("/admin", "routes/admin.tsx"),
     ...prefix("/admin/products", [
         index("routes/adminProducts.tsx"),
+        route("add", "routes/adminProductAdd.tsx"),
         route(":id", "routes/adminProductEdit.tsx"),
     ]),
 ] satisfies RouteConfig;
