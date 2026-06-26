@@ -1,87 +1,83 @@
-# Welcome to React Router!
+# Candle E-Shop
+React Router v7, Prisma ORM7 kai MySQL
 
-A modern, production-ready template for building full-stack React applications using React Router.
+## Requirements
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+Katebaste:
+    Node.js
+    XAMPP
+    Git
 
-## Features
+## Set up
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
-
-## Getting Started
-
-### Installation
-
-Install the dependencies:
+### 1. kane clone to repository
 
 ```bash
+git clone <your-repo-url>
+```
+
+### 2. Depentancies
+
+otan to anoi3eis sto vc code anoi3e terminal kai grapse:
+
+```bash
+cd candle-e-shop
 npm install
 ```
 
-### Development
+### 3. Database
 
-Start the development server with HMR:
+gia na kaneis setup to DB anoi3e to XAMPP kane enable to MySQL
+kai anoi3e to Shell apo to XAMPP kai grapse:
+
+```bash
+CREATE DATABASE candle_e_shop;
+```
+
+### 4. .env file
+
+ftia3e ena arxei pou 8a legete ".env" sto root tou project
+kai grapse:
+
+```env
+DATABASE_URL="mysql://root:@localhost:3306/candle_e_shop"
+DATABASE_HOST="localhost"
+DATABASE_USER="root"
+DATABASE_PASSWORD=""
+DATABASE_NAME="candle_e_shop"
+```
+
+### 5. Generate Prisma Client
+
+```bash
+npx prisma generate
+```
+
+### 6. DB Mitigation
+
+```bash
+npx prisma migrate dev
+```
+
+### 7. Bale inserts
+
+anoi3e pali to shell sto XAMPP kai grapse:
+
+```XAMP Shell
+mysql -h localhost -u root
+USE candle_e_shop;
+```
+kai meta:
+
+```sql
+INSERT INTO Product (title, description, price, imageUrl, visible, createdAt) VALUES
+('Lavender Candle', 'A relaxing lavender scented candle', 9.99, 'https://placehold.co/400x250', 1, NOW()),
+('Vanilla Candle', 'A sweet vanilla scented candle', 12.99, 'https://placehold.co/400x250', 1, NOW()),
+('Rose Candle', 'A romantic rose scented candle', 14.99, 'https://placehold.co/400x250', 1, NOW());
+```
+
+### 8. Run Dev
 
 ```bash
 npm run dev
 ```
-
-Your application will be available at `http://localhost:5173`.
-
-## Building for Production
-
-Create a production build:
-
-```bash
-npm run build
-```
-
-## Deployment
-
-### Docker Deployment
-
-To build and run using Docker:
-
-```bash
-docker build -t my-app .
-
-# Run the container
-docker run -p 3000:3000 my-app
-```
-
-The containerized application can be deployed to any platform that supports Docker, including:
-
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.
