@@ -45,7 +45,6 @@ export default function AdminProducts() {
 
             <div className="flex flex-1">
 
-                {/* Sidebar */}
                 <div className="flex flex-col w-48">
                     <Link to="/admin/products/add">
                         <div className="border-2 border-black m-1 p-2">
@@ -60,10 +59,8 @@ export default function AdminProducts() {
                     </Link>
                 </div>
 
-                {/* Main content */}
                 <div className="flex flex-col flex-1 p-4 gap-3">
 
-                    {/* Search and sort */}
                     <div className="flex gap-2">
                         <input
                             type="text"
@@ -85,7 +82,6 @@ export default function AdminProducts() {
                         </select>
                     </div>
 
-                    {/* Products grid */}
                     <div className="grid grid-cols-3 gap-3">
                         {filtered.length === 0 ? (
                             <p className="text-gray-600 text-sm col-span-3">No products found.</p>

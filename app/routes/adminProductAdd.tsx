@@ -56,7 +56,6 @@ export default function AdminProductAdd() {
 
             <div className="flex flex-1">
 
-                {/* Sidebar */}
                 <div className="flex flex-col w-48">
                     <div className="border-2 border-black m-1 p-2">
                         <h1 className="text-xl">Add Product</h1>
@@ -69,7 +68,6 @@ export default function AdminProductAdd() {
                     </Link>
                 </div>
 
-                {/* Form */}
                 <div className="p-4">
                     <Form method="post" className="flex flex-col gap-3 w-80">
 

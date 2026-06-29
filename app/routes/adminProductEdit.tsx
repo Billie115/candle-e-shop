@@ -68,7 +68,7 @@ export default function AdminProductEdit() {
 
             <div className="flex flex-1">
 
-                {/* Sidebar */}
+
                 <div className="flex flex-col w-48">
                     <div className="border-2 border-black m-1 p-2">
                         <h1 className="text-xl">Edit</h1>
