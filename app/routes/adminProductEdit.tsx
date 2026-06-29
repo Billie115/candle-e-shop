@@ -1,4 +1,4 @@
-import { useLoaderData, Form, Link, redirect } from "react-router";
+import { useLoaderData, Form, Link, redirect, useFetcher } from "react-router";
 import { useState } from "react";
 import db from "~/db.server";
 import NavbarAdmin from "~/components/NavbarAdmin";
@@ -39,7 +39,28 @@ export async function action({ request, params }: { request: Request, params: { 
 
 export default function AdminProductEdit() {
     const { product, totalProducts, visibleProducts } = useLoaderData<typeof loader>();
+    const [imageMode, setImageMode] = useState<"url" | "upload">("url");
     const [imageUrl, setImageUrl] = useState(product?.imageUrl || "");
+    const [preview, setPreview] = useState(product?.imageUrl || "");
+    const uploadFetcher = useFetcher();
+
+    async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        uploadFetcher.submit(formData, {
+            method: "post",
+            action: "/upload",
+            encType: "multipart/form-data",
+        });
+
+        setPreview(URL.createObjectURL(file));
+    }
+
+    const uploadedFilename = uploadFetcher.data?.filename;
 
     return (
         <div className="flex flex-col min-h-screen">
@@ -60,7 +81,6 @@ export default function AdminProductEdit() {
                     </Link>
                 </div>
 
-                {/* Edit form */}
                 <div className="p-4">
                     <Form method="post" className="flex flex-col gap-3 w-80">
 
@@ -94,22 +114,60 @@ export default function AdminProductEdit() {
                             />
                         </div>
 
-                        <div className="flex flex-col gap-1">
-                            <label className="text-sm font-bold">Image URL</label>
-                            <input
-                                name="imageUrl"
-                                value={imageUrl}
-                                onChange={(e) => setImageUrl(e.target.value)}
-                                className="border-2 border-black p-1 text-sm"
-                            />
-                            {imageUrl && (
-                                <img
-                                    src={imageUrl}
-                                    alt="Preview"
-                                    className="w-full h-40 object-cover border-2 border-black mt-1"
-                                />
-                            )}
+                        <div className="flex gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setImageMode("url")}
+                                className={`border-2 border-black p-1 text-sm flex-1 ${imageMode === "url" ? "bg-black text-white" : ""}`}
+                            >
+                                URL
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setImageMode("upload")}
+                                className={`border-2 border-black p-1 text-sm flex-1 ${imageMode === "upload" ? "bg-black text-white" : ""}`}
+                            >
+                                Upload
+                            </button>
                         </div>
+
+                        {imageMode === "url" ? (
+                            <div className="flex flex-col gap-1">
+                                <label className="text-sm font-bold">Image URL</label>
+                                <input
+                                    name="imageUrl"
+                                    value={imageUrl}
+                                    onChange={(e) => {
+                                        setImageUrl(e.target.value);
+                                        setPreview(e.target.value);
+                                    }}
+                                    className="border-2 border-black p-1 text-sm"
+                                />
+                            </div>
+                        ) : (
+                            <div className="flex flex-col gap-1">
+                                <label className="text-sm font-bold">Upload Image</label>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleFileChange}
+                                    className="border-2 border-black p-1 text-sm"
+                                />
+                                {uploadedFilename && (
+                                    <input type="hidden" name="imageUrl" value={`/images/${uploadedFilename}`} />
+                                )}
+                                {!uploadedFilename && product?.imageUrl && (
+                                    <input type="hidden" name="imageUrl" value={product.imageUrl} />
+                                )}
+                                {uploadFetcher.state === "submitting" && (
+                                    <p className="text-xs text-gray-500">Uploading...</p>
+                                )}
+                            </div>
+                        )}
+
+                        {preview && (
+                            <img src={preview} alt="Preview" className="w-full h-40 object-cover border-2 border-black" />
+                        )}
 
                         <div className="flex items-center gap-2">
                             <input
@@ -133,7 +191,6 @@ export default function AdminProductEdit() {
 
                     </Form>
 
-                    {/* Delete form */}
                     <Form
                         method="post"
                         className="mt-2 w-80"

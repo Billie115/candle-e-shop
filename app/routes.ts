@@ -4,6 +4,7 @@ export default [
     index("routes/home.tsx"),
     route("/products", "routes/products.tsx"),
     route("/products/:id", "routes/productView.tsx"),
+    route("/upload", "routes/upload.tsx"),
     route("/admin", "routes/admin.tsx"),
     ...prefix("/admin/products", [
         index("routes/adminProducts.tsx"),
