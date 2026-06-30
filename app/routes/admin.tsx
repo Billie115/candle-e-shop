@@ -1,6 +1,7 @@
-import { useLoaderData, Link } from "react-router";
+import { Link } from "react-router";
 import db from "~/db.server";
 import NavbarAdmin from "~/components/NavbarAdmin";
+import type { Route } from "./+types/admin";
 
 export async function loader() {
     const totalProducts = await db.product.count();
@@ -8,8 +9,8 @@ export async function loader() {
     return { totalProducts, visibleProducts };
 }
 
-export default function Admin() {
-    const { totalProducts, visibleProducts } = useLoaderData<typeof loader>();
+export default function Admin({ loaderData }: Route.ComponentProps) {
+    const { totalProducts, visibleProducts } = loaderData;
 
     return (
         <div className="flex flex-col min-h-screen">

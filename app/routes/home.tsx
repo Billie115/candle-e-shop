@@ -1,17 +1,26 @@
-import { useLoaderData, Link } from "react-router";
+import { Link } from "react-router";
 import db from "~/db.server";
 import Navbar from "~/components/Navbar";
+import type { Route } from "./+types/home";
 
 export async function loader() {
     const products = await db.product.findMany({
         where: { visible: true },
         take: 5,
     });
-    return { products };
+
+    const safeProducts = products.map((product) => ({
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        imageUrl: product.imageUrl,
+    }));
+
+    return { products: safeProducts };
 }
 
-export default function Home() {
-    const { products } = useLoaderData<typeof loader>();
+export default function Home({ loaderData }: Route.ComponentProps) {
+    const { products } = loaderData;
 
     return (
         <div className="flex flex-col min-h-screen">

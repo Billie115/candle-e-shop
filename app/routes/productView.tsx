@@ -1,16 +1,30 @@
-import { useLoaderData, Link } from "react-router";
+import { Link } from "react-router";
 import db from "~/db.server";
 import Navbar from "~/components/Navbar";
+import type { Route } from "./+types/productView";
 
-export async function loader({ params }: { params: { id: string } }) {
+export async function loader({ params }: Route.LoaderArgs) {
     const product = await db.product.findUnique({
         where: { id: Number(params.id), visible: true },
     });
-    return { product };
+
+    if (!product) {
+        return { product: null };
+    }
+
+    const safeProduct = {
+        id: product.id,
+        title: product.title,
+        description: product.description,
+        price: product.price,
+        imageUrl: product.imageUrl,
+    };
+
+    return { product: safeProduct };
 }
 
-export default function ProductView() {
-    const { product } = useLoaderData<typeof loader>();
+export default function ProductView({ loaderData }: Route.ComponentProps) {
+    const { product } = loaderData;
 
     if (!product) {
         return (

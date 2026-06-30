@@ -1,18 +1,34 @@
-import { useLoaderData, Form, Link, redirect, useFetcher } from "react-router";
+import { Form, Link, redirect, useFetcher, useActionData } from "react-router";
 import { useState } from "react";
 import db from "~/db.server";
 import NavbarAdmin from "~/components/NavbarAdmin";
+import type { Route } from "./+types/adminProductEdit";
 
-export async function loader({ params }: { params: { id: string } }) {
+const DEFAULT_IMAGE = "https://placehold.co/400x250";
+
+export async function loader({ params }: Route.LoaderArgs) {
     const product = await db.product.findUnique({
         where: { id: Number(params.id) },
     });
+
+    const safeProduct = product ? {
+        id: product.id,
+        title: product.title,
+        description: product.description,
+        price: product.price,
+        imageUrl: product.imageUrl,
+        visible: product.visible,
+        categoryId: product.categoryId,
+    } : null;
+
     const totalProducts = await db.product.count();
     const visibleProducts = await db.product.count({ where: { visible: true } });
-    return { product, totalProducts, visibleProducts };
+    const categories = await db.category.findMany();
+
+    return { product: safeProduct, totalProducts, visibleProducts, categories };
 }
 
-export async function action({ request, params }: { request: Request, params: { id: string } }) {
+export async function action({ request, params }: Route.ActionArgs) {
     const formData = await request.formData();
     const intent = formData.get("intent");
 
@@ -23,22 +39,48 @@ export async function action({ request, params }: { request: Request, params: { 
         return redirect("/admin/products");
     }
 
+    const title = String(formData.get("title") || "").trim();
+    const description = String(formData.get("description") || "").trim();
+    const priceRaw = String(formData.get("price") || "").trim();
+    const imageUrl = String(formData.get("imageUrl") || "").trim() || DEFAULT_IMAGE;
+    const categoryId = formData.get("categoryId");
+
+    const errors: Record<string, string> = {};
+
+    if (!title) errors.title = "Title is required.";
+    if (!description) errors.description = "Description is required.";
+
+    const price = Number(priceRaw);
+    if (!priceRaw) {
+        errors.price = "Price is required.";
+    } else if (isNaN(price)) {
+        errors.price = "Price must be a number.";
+    } else if (price <= 0) {
+        errors.price = "Price must be greater than 0.";
+    }
+
+    if (Object.keys(errors).length > 0) {
+        return { errors };
+    }
+
     await db.product.update({
         where: { id: Number(params.id) },
         data: {
-            title: String(formData.get("title")),
-            description: String(formData.get("description")),
-            price: Number(formData.get("price")),
-            imageUrl: String(formData.get("imageUrl")),
+            title,
+            description,
+            price,
+            imageUrl,
             visible: formData.get("visible") === "on",
+            categoryId: categoryId ? Number(categoryId) : null,
         },
     });
 
     return redirect("/admin/products");
 }
 
-export default function AdminProductEdit() {
-    const { product, totalProducts, visibleProducts } = useLoaderData<typeof loader>();
+export default function AdminProductEdit({ loaderData }: Route.ComponentProps) {
+    const { product, totalProducts, visibleProducts, categories } = loaderData;
+    const actionData = useActionData<typeof action>();
     const [imageMode, setImageMode] = useState<"url" | "upload">("url");
     const [imageUrl, setImageUrl] = useState(product?.imageUrl || "");
     const [preview, setPreview] = useState(product?.imageUrl || "");
@@ -61,13 +103,13 @@ export default function AdminProductEdit() {
     }
 
     const uploadedFilename = uploadFetcher.data?.filename;
+    const hasErrors = actionData?.errors && Object.keys(actionData.errors).length > 0;
 
     return (
         <div className="flex flex-col min-h-screen">
             <NavbarAdmin totalProducts={totalProducts} visibleProducts={visibleProducts} />
 
             <div className="flex flex-1">
-
 
                 <div className="flex flex-col w-48">
                     <div className="border-2 border-black m-1 p-2">
@@ -82,6 +124,13 @@ export default function AdminProductEdit() {
                 </div>
 
                 <div className="p-4">
+
+                    {hasErrors && (
+                        <div className="border-2 border-red-600 bg-red-50 text-red-700 text-sm p-2 mb-3 w-80">
+                            Please fix the errors below before submitting.
+                        </div>
+                    )}
+
                     <Form method="post" className="flex flex-col gap-3 w-80">
 
                         <div className="flex flex-col gap-1">
@@ -91,6 +140,9 @@ export default function AdminProductEdit() {
                                 defaultValue={product?.title}
                                 className="border-2 border-black p-1 text-sm"
                             />
+                            {actionData?.errors?.title && (
+                                <p className="text-xs text-red-600">{actionData.errors.title}</p>
+                            )}
                         </div>
 
                         <div className="flex flex-col gap-1">
@@ -101,6 +153,9 @@ export default function AdminProductEdit() {
                                 className="border-2 border-black p-1 text-sm"
                                 rows={3}
                             />
+                            {actionData?.errors?.description && (
+                                <p className="text-xs text-red-600">{actionData.errors.description}</p>
+                            )}
                         </div>
 
                         <div className="flex flex-col gap-1">
@@ -112,6 +167,25 @@ export default function AdminProductEdit() {
                                 defaultValue={product?.price}
                                 className="border-2 border-black p-1 text-sm"
                             />
+                            {actionData?.errors?.price && (
+                                <p className="text-xs text-red-600">{actionData.errors.price}</p>
+                            )}
+                        </div>
+
+                        <div className="flex flex-col gap-1">
+                            <label className="text-sm font-bold">Category</label>
+                            <select
+                                name="categoryId"
+                                defaultValue={product?.categoryId ?? ""}
+                                className="border-2 border-black p-1 text-sm"
+                            >
+                                <option value="">No category</option>
+                                {categories.map((category) => (
+                                    <option key={category.id} value={category.id}>
+                                        {category.name}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
 
                         <div className="flex gap-2">
@@ -133,10 +207,11 @@ export default function AdminProductEdit() {
 
                         {imageMode === "url" ? (
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-bold">Image URL</label>
+                                <label className="text-sm font-bold">Image URL (optional)</label>
                                 <input
                                     name="imageUrl"
                                     value={imageUrl}
+                                    placeholder="Leave empty to use default image"
                                     onChange={(e) => {
                                         setImageUrl(e.target.value);
                                         setPreview(e.target.value);
@@ -146,7 +221,7 @@ export default function AdminProductEdit() {
                             </div>
                         ) : (
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-bold">Upload Image</label>
+                                <label className="text-sm font-bold">Upload Image (optional)</label>
                                 <input
                                     type="file"
                                     accept="image/*"
@@ -165,9 +240,11 @@ export default function AdminProductEdit() {
                             </div>
                         )}
 
-                        {preview && (
-                            <img src={preview} alt="Preview" className="w-full h-40 object-cover border-2 border-black" />
-                        )}
+                        <img
+                            src={preview || DEFAULT_IMAGE}
+                            alt="Preview"
+                            className="w-full h-40 object-cover border-2 border-black"
+                        />
 
                         <div className="flex items-center gap-2">
                             <input
