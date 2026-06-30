@@ -51,7 +51,9 @@ export async function action({ request }: Route.ActionArgs) {
         },
     });
 
-    return redirect("/admin/products");
+    const url = new URL(request.url);
+    const redirectUrl = url.search ? `/admin/products${url.search}` : "/admin/products";
+    return redirect(redirectUrl);
 }
 
 export default function AdminProductAdd({ loaderData }: Route.ComponentProps) {
