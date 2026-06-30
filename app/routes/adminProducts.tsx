@@ -121,6 +121,9 @@ export default function AdminProducts({ loaderData }: Route.ComponentProps) {
         setSearchParams(params);
     }
 
+    const queryString = searchParams.toString();
+    const addLink = queryString ? `/admin/products/add?${queryString}` : "/admin/products/add";
+
     return (
         <div className="flex flex-col min-h-screen">
             <NavbarAdmin totalProducts={totalProducts} visibleProducts={visibleProducts} />
@@ -128,7 +131,7 @@ export default function AdminProducts({ loaderData }: Route.ComponentProps) {
             <div className="flex flex-1">
 
                 <div className="flex flex-col w-48">
-                    <Link to="/admin/products/add">
+                    <Link to={addLink}>
                         <div className="border-2 border-black m-1 p-2">
                             <h1 className="text-xl">+ Add</h1>
                         </div>
@@ -210,7 +213,7 @@ export default function AdminProducts({ loaderData }: Route.ComponentProps) {
                         ) : (
                             products.map((product) => (
                                 <div key={product.id} className="border-2 border-black p-2 flex flex-col gap-1">
-                                    <Link to={`/admin/products/${product.id}`}>
+                                    <Link to={`/admin/products/${product.id}?${queryString}`}>
                                         <img
                                             src={product.imageUrl}
                                             alt={product.title}

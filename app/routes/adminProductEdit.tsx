@@ -1,4 +1,4 @@
-import { Form, Link, redirect, useFetcher, useActionData } from "react-router";
+import { Form, Link, redirect, useFetcher, useActionData, useSearchParams } from "react-router";
 import { useState } from "react";
 import db from "~/db.server";
 import NavbarAdmin from "~/components/NavbarAdmin";
@@ -81,6 +81,8 @@ export async function action({ request, params }: Route.ActionArgs) {
 export default function AdminProductEdit({ loaderData }: Route.ComponentProps) {
     const { product, totalProducts, visibleProducts, categories } = loaderData;
     const actionData = useActionData<typeof action>();
+    const [searchParams] = useSearchParams();
+    const backLink = searchParams.toString() ? `/admin/products?${searchParams.toString()}` : "/admin/products";
     const [imageMode, setImageMode] = useState<"url" | "upload">("url");
     const [imageUrl, setImageUrl] = useState(product?.imageUrl || "");
     const [preview, setPreview] = useState(product?.imageUrl || "");
@@ -116,7 +118,7 @@ export default function AdminProductEdit({ loaderData }: Route.ComponentProps) {
                         <h1 className="text-xl">Edit</h1>
                     </div>
                     <div className="flex-1"></div>
-                    <Link to="/admin/products">
+                    <Link to={backLink}>
                         <div className="border-2 border-black m-1 p-2">
                             <h1 className="text-xl">← Back</h1>
                         </div>
