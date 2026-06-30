@@ -3,10 +3,13 @@ import { useState } from "react";
 import db from "~/db.server";
 import NavbarAdmin from "~/components/NavbarAdmin";
 import type { Route } from "./+types/adminProductEdit";
+import { requireAdmin } from "~/session.server";
 
 const DEFAULT_IMAGE = "https://placehold.co/400x250";
 
-export async function loader({ params }: Route.LoaderArgs) {
+export async function loader({ request, params }: Route.LoaderArgs) {
+    await requireAdmin(request);
+    
     const product = await db.product.findUnique({
         where: { id: Number(params.id) },
     });

@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link, Form } from "react-router";
 
 interface NavbarAdminProps {
     totalProducts: number;
@@ -16,10 +16,22 @@ export default function NavbarAdmin({ totalProducts, visibleProducts }: NavbarAd
                     <p className="text-sm hover:underline">Products</p>
                 </Link>
             </div>
-            <div className="flex gap-4 ml-auto text-sm text-gray-600">
+            <div className="flex gap-4 text-sm text-gray-600">
                 <p>Total: <span className="font-bold text-black">{totalProducts}</span></p>
                 <p>Visible: <span className="font-bold text-green-600">{visibleProducts}</span></p>
                 <p>Hidden: <span className="font-bold text-red-600">{totalProducts - visibleProducts}</span></p>
+            </div>
+            <div className="ml-auto flex gap-2">
+                <Link to="/">
+                    <div className="text-sm border-2 border-black px-3 py-1">
+                        ← Site
+                    </div>
+                </Link>
+                <Form method="post" action="/logout">
+                    <button type="submit" className="text-sm border-2 border-black px-3 py-1">
+                        Logout
+                    </button>
+                </Form>
             </div>
         </div>
     );

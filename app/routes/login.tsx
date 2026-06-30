@@ -30,7 +30,9 @@ export async function action({ request }: Route.ActionArgs) {
         return { errors: { username: "Invalid username or password." } };
     }
 
-    return createUserSession(user.id, "/");
+    const url = new URL(request.url);
+    const redirectTo = url.searchParams.get("redirectTo") || "/";
+    return createUserSession(user.id, redirectTo);
 }
 
 export default function Login({ actionData }: Route.ComponentProps) {

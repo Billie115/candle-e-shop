@@ -38,3 +38,43 @@ export async function logout(request: Request) {
         },
     });
 }
+
+export async function requireAdmin(request: Request) {
+    const userId = await getUserId(request);
+    const { redirect } = await import("react-router");
+
+    if (!userId) {
+        throw redirect("/login");
+    }
+
+    const { default: db } = await import("~/db.server");
+    const user = await db.user.findUnique({ where: { id: userId } });
+
+    if (!user || !user.isAdmin) {
+        throw redirect("/");
+    }
+
+    return user;
+}
+
+const cartStorage = createCookieSessionStorage({
+    cookie: {
+        name: "__cart",
+        secrets: ["replace-this-with-another-long-random-secret"],
+        sameSite: "lax",
+        path: "/",
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+    },
+});
+
+export async function getCart(request: Request): Promise<Record<string, number>> {
+    const session = await cartStorage.getSession(request.headers.get("Cookie"));
+    return session.get("items") || {};
+}
+
+export async function saveCart(request: Request, items: Record<string, number>) {
+    const session = await cartStorage.getSession(request.headers.get("Cookie"));
+    session.set("items", items);
+    return cartStorage.commitSession(session);
+}

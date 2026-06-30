@@ -1,5 +1,4 @@
 import { Link, useSearchParams, Form } from "react-router";
-import db from "~/db.server";
 import Navbar from "~/components/Navbar";
 import type { Route } from "./+types/products";
 
@@ -13,6 +12,10 @@ const SORT_LABELS: Record<string, string> = {
 };
 
 export async function loader({ request }: Route.LoaderArgs) {
+    const db = (await import("~/db.server")).default;
+    const { getUserId } = await import("~/session.server");
+
+    const userId = await getUserId(request);
     const url = new URL(request.url);
     const requestedPage = Math.max(1, Number(url.searchParams.get("page")) || 1);
     const search = url.searchParams.get("search") || "";
@@ -66,11 +69,12 @@ export async function loader({ request }: Route.LoaderArgs) {
         sort,
         categories: categoriesWithCounts,
         selectedCategoryIds: categoryIds,
+        isLoggedIn: !!userId,
     };
 }
 
 export default function Products({ loaderData }: Route.ComponentProps) {
-    const { products, page, totalPages, search, sort, categories, selectedCategoryIds } = loaderData;
+    const { products, page, totalPages, search, sort, categories, selectedCategoryIds, isLoggedIn } = loaderData;
     const [searchParams, setSearchParams] = useSearchParams();
 
     function pageLink(p: number) {
@@ -103,7 +107,7 @@ export default function Products({ loaderData }: Route.ComponentProps) {
 
     return (
         <div className="flex flex-col min-h-screen">
-            <Navbar />
+            <Navbar isLoggedIn={isLoggedIn} />
 
             <div className="p-8">
                 <h1 className="text-2xl font-bold mb-6">All Products</h1>

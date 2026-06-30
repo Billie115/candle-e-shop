@@ -8,6 +8,10 @@ export default [
     route("/register", "routes/register.tsx"),
     route("/login", "routes/login.tsx"),
     route("/admin", "routes/admin.tsx"),
+    route("/logout", "routes/logout.tsx"),
+    route("/cart", "routes/cart.tsx"),
+    route("/checkout", "routes/checkout.tsx"),
+    route("/order-success", "routes/orderSuccess.tsx"),
     ...prefix("/admin/products", [
         index("routes/adminProducts.tsx"),
         route("add", "routes/adminProductAdd.tsx"),

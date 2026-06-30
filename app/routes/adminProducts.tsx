@@ -2,6 +2,7 @@ import { useFetcher, Link, useSearchParams, Form } from "react-router";
 import db from "~/db.server";
 import NavbarAdmin from "~/components/NavbarAdmin";
 import type { Route } from "./+types/adminProducts";
+import { requireAdmin } from "~/session.server";
 
 const PAGE_SIZE = 5;
 
@@ -12,7 +13,9 @@ const SORT_LABELS: Record<string, string> = {
     "name-desc": "Name: Z to A",
 };
 
-export async function loader({ request }: Route.LoaderArgs) {
+export async function loader({ request, params }: Route.LoaderArgs) {
+    await requireAdmin(request);
+    
     const url = new URL(request.url);
     const requestedPage = Math.max(1, Number(url.searchParams.get("page")) || 1);
     const search = url.searchParams.get("search") || "";

@@ -2,8 +2,11 @@ import { Link } from "react-router";
 import db from "~/db.server";
 import NavbarAdmin from "~/components/NavbarAdmin";
 import type { Route } from "./+types/admin";
+import { requireAdmin } from "~/session.server";
 
-export async function loader() {
+export async function loader({ request }: Route.LoaderArgs) {
+    await requireAdmin(request);
+
     const totalProducts = await db.product.count();
     const visibleProducts = await db.product.count({ where: { visible: true } });
     return { totalProducts, visibleProducts };

@@ -3,17 +3,20 @@ import { useState } from "react";
 import db from "~/db.server";
 import NavbarAdmin from "~/components/NavbarAdmin";
 import type { Route } from "./+types/adminProductAdd";
+import { requireAdmin } from "~/session.server";
 
 const DEFAULT_IMAGE = "https://placehold.co/400x250";
 
-export async function loader() {
+export async function loader({ request, params }: Route.LoaderArgs) {
+    await requireAdmin(request);
     const totalProducts = await db.product.count();
     const visibleProducts = await db.product.count({ where: { visible: true } });
     const categories = await db.category.findMany();
     return { totalProducts, visibleProducts, categories };
 }
 
-export async function action({ request }: Route.ActionArgs) {
+export async function action({ request, params }: Route.LoaderArgs) {
+    await requireAdmin(request);
     const formData = await request.formData();
 
     const title = String(formData.get("title") || "").trim();
